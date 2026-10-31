@@ -40,10 +40,18 @@ export class IshikawaDB implements DiagramDB {
   }
 
   addNode(rawLevel: number, text: string): void {
-    const label = common.sanitizeText(text, getConfig());
+    const eliminated = /^-[\t ]+\S/.test(text);
+    const label = common.sanitizeText(
+      eliminated ? text.replace(/^-[\t ]+/, '') : text,
+      getConfig()
+    );
+    const node: IshikawaNode = { text: label, children: [] };
+    if (eliminated) {
+      node.eliminated = true;
+    }
 
     if (!this.root) {
-      this.root = { text: label, children: [] };
+      this.root = node;
       this.stack = [{ level: 0, node: this.root }];
       setDiagramTitle(label);
       return;
@@ -65,7 +73,6 @@ export class IshikawaDB implements DiagramDB {
     }
 
     const parent = this.stack[this.stack.length - 1].node;
-    const node: IshikawaNode = { text: label, children: [] };
     parent.children.push(node);
     this.stack.push({ level, node });
   }

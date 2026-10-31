@@ -21,8 +21,9 @@ elimination symbol.
 ### In scope
 
 - An authoring prefix for an individual eliminated item, available with both diagram headers.
-- Strike-through and an adjacent symbol on the rendered label, without removing the item or its
-  connecting branch.
+- Visible strike-through formatting and an adjacent symbol on the rendered label, without removing
+  the item or its connecting branch. Strike-through may use font/text decoration or an explicitly
+  rendered line through the label.
 - Effect, cause, and nested-subcause labels, including wrapped and explicitly broken lines.
 - Mixed eliminated/unmarked items, existing indentation rules, themes, and hand-drawn rendering.
 - Syntax documentation describing elimination, examples, and the leading-hyphen compatibility change.
@@ -51,8 +52,12 @@ The following define the proposed delivery contract pending review:
   the label, separated from the text, and do not strike through the symbol itself.
 - Elimination applies only to the explicitly prefixed item, including the effect/root if marked.
   An eliminated parent retains its children, which remain unmarked unless individually prefixed.
-- Use text strike-through and a symbol, not color alone. Preserve existing text sanitization and
-  security behavior; authors do not need HTML to express the state.
+- Require both visible strike-through and a symbol, not a symbol or color alone. Either font/text
+  decoration or explicitly rendered lines may provide the strike-through; no particular rendering
+  technique is required. Each line must cross the middle of its label text over the text's width,
+  remain legible, and exclude the adjacent elimination symbol.
+- Preserve existing text sanitization and security behavior; authors do not need HTML, a special
+  font, or additional syntax beyond the elimination prefix to express the state.
 - Existing generated documentation is not edited manually. Keep the specification and editable
   syntax documentation in the documentation source tree.
 
@@ -86,9 +91,11 @@ in their original positions in the hierarchy.
    non-ASCII dashes remain literal labels with no elimination decoration.
 5. An eliminated parent does not implicitly mark, hide, or remove any descendant. Duplicate labels
    can have different elimination states without affecting one another.
-6. Every line of a wrapped/multiline eliminated label is crossed out. Exactly one symbol appears
-   next to the label as a whole, outside the strike-through, without clipping or overlapping the
-   label's text, box/head boundary, or connecting branch. Label measurements account for the symbol.
+6. Every line of a wrapped/multiline eliminated label has a visible strike-through across the
+   middle of its text, provided by font/text decoration or an explicitly rendered line. An underline,
+   overline, or symbol alone does not satisfy this criterion. Exactly one symbol appears next to the
+   label as a whole, outside the strike-through, without clipping or overlapping the label's text,
+   box/head boundary, or connecting branch. Measurements account for the symbol and any drawn lines.
 7. Eliminated items remain readable in default, dark, and forest themes and in standard and
    hand-drawn looks. Their meaning does not depend on color or an external icon resource.
 8. Removing an item's prefix restores ordinary presentation. Rendering a subsequent unmarked
@@ -105,6 +112,9 @@ in their original positions in the hierarchy.
   unindented causes, an effect indented more than its causes, and nested items.
 - Browser assertions verify strike-through on all label lines, one undecorated symbol per marked
   item, and absence of decoration on unmarked items. Cover root, boxed causes, and nested label paths.
+  Match the chosen technique: check effective text decoration for font-based formatting, or check
+  drawn-line position and width against each text line's measured bounds. Visual checks must confirm
+  the strike-through remains visible in the final rendered SVG, not merely that a style is present.
 - Visual fixtures cover mixed states, eliminated parents with active children, long/wrapped labels,
   existing supported `<br>` line breaks, both sides of the spine, themes, and hand-drawn look.
   Check label/symbol bounds for clipping and overlap as well as screenshot appearance.
