@@ -35,7 +35,7 @@
   - Done when: the targeted Ishikawa unit suite passes and establishes the data/structure portions
     of spec AC 1–5, 8, and 9; existing unmarked node expectations still pass.
 
-- [ ] Task 2: Render measured elimination labels across every Ishikawa label path.
+- [x] Task 2: Render measured elimination labels across every Ishikawa label path.
   - Touchpoints: `packages/mermaid/src/diagrams/ishikawa/ishikawaRenderer.ts`,
     `ishikawaStyles.ts`, and a new focused Playwright spec under
     `e2e/rendering/ishikawa/pr-check/`.

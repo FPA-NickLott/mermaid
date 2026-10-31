@@ -42,6 +42,10 @@ const getStyles: DiagramStylesProvider = (options) => `
   font-size: 14px;
 }
 
+.ishikawa .ishikawa-eliminated-text {
+  text-decoration: line-through;
+}
+
 .ishikawa .ishikawa-label {
   text-anchor: end;
 }

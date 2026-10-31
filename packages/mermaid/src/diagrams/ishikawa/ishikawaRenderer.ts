@@ -84,7 +84,7 @@ const draw: DrawDefinition = (_text, id, _version, diagram: Diagram) => {
   const spineLine = isHandDrawn
     ? undefined
     : drawLine(g, spineX, spineY, spineX, spineY, 'ishikawa-spine');
-  drawHead(g, spineX, spineY, root.text, fontSize, roughContext);
+  drawHead(g, spineX, spineY, root.text, fontSize, roughContext, root.eliminated);
 
   if (!causes.length) {
     if (isHandDrawn) {
@@ -170,7 +170,8 @@ const drawHead = (
   y: number,
   label: string,
   fontSize: number,
-  roughContext?: RoughContext
+  roughContext?: RoughContext,
+  eliminated = false
 ): void => {
   const maxChars = Math.max(6, Math.floor(110 / (fontSize * 0.6)));
   const headGroup = svg
@@ -185,7 +186,8 @@ const drawHead = (
     0,
     'ishikawa-head-label',
     'start',
-    fontSize
+    fontSize,
+    eliminated
   );
   const tb = textEl.node()!.getBBox();
   const w = Math.max(60, tb.width + 6);
@@ -212,6 +214,7 @@ const drawHead = (
 
 interface LabelEntry {
   text: string;
+  eliminated?: boolean;
   depth: number;
   parentIndex: number;
   childCount: number;
@@ -240,6 +243,7 @@ const flattenTree = (children: IshikawaNode[], direction: 1 | -1) => {
       entries.push({
         depth,
         text: wrapText(child.text, 15),
+        eliminated: child.eliminated,
         parentIndex: pid,
         childCount: gc.length,
       });
@@ -269,7 +273,8 @@ const drawCauseLabel = (
   y: number,
   direction: 1 | -1,
   fontSize: number,
-  roughContext?: RoughContext
+  roughContext?: RoughContext,
+  eliminated = false
 ) => {
   const lg = svg.append('g').attr('class', 'ishikawa-label-group');
   const lt = drawMultilineText(
@@ -279,7 +284,8 @@ const drawCauseLabel = (
     y + 11 * direction,
     'ishikawa-label cause',
     'middle',
-    fontSize
+    fontSize,
+    eliminated
   );
   const tb = lt.node()!.getBBox();
   if (roughContext) {
@@ -363,7 +369,7 @@ const drawBranch = (
   if (roughContext) {
     drawArrowMarker(svg, startX, startY, startX - endX, startY - endY, roughContext);
   }
-  drawCauseLabel(svg, node.text, endX, endY, direction, fontSize, roughContext);
+  drawCauseLabel(svg, node.text, endX, endY, direction, fontSize, roughContext, node.eliminated);
 
   if (!children.length) {
     return;
@@ -409,7 +415,7 @@ const drawBranch = (
       if (roughContext) {
         drawArrowMarker(grp, bx0, y, 1, 0, roughContext);
       }
-      drawMultilineText(grp, e.text, bx1, y, 'ishikawa-label align', 'end', fontSize);
+      drawMultilineText(grp, e.text, bx1, y, 'ishikawa-label align', 'end', fontSize, e.eliminated);
     } else {
       // Diagonal bone: start from evenly-spaced point on parent's horizontal, angle toward target Y
       const k = par.childrenDrawn++;
@@ -420,7 +426,7 @@ const drawBranch = (
       if (roughContext) {
         drawArrowMarker(grp, bx0, by0, bx0 - bx1, by0 - y, roughContext);
       }
-      drawMultilineText(grp, e.text, bx1, y, oddLabel, 'end', fontSize);
+      drawMultilineText(grp, e.text, bx1, y, oddLabel, 'end', fontSize, e.eliminated);
     }
 
     if (e.childCount > 0) {
@@ -461,11 +467,13 @@ const drawMultilineText = (
   y: number,
   cls: string,
   anchor: 'middle' | 'start' | 'end',
-  fontSize: number
+  fontSize: number,
+  eliminated = false
 ) => {
   const lines = splitLines(text);
   const lh = fontSize * 1.05;
-  const el = g
+  const labelGroup = eliminated ? g.append('g').attr('class', 'ishikawa-eliminated-label') : g;
+  const el = labelGroup
     .append('text')
     .attr('class', cls)
     .attr('text-anchor', anchor)
@@ -477,7 +485,28 @@ const drawMultilineText = (
       .attr('dy', i === 0 ? 0 : lh)
       .text(line);
   }
-  return el;
+  if (!eliminated) {
+    return el;
+  }
+
+  el.classed('ishikawa-eliminated-text', true);
+  const bounds = el.node()!.getBBox();
+  const gap = fontSize * 0.35;
+  const symbol = labelGroup
+    .append('text')
+    .attr('class', `${cls} ishikawa-elimination-symbol`)
+    .style('text-anchor', 'start')
+    .style('dominant-baseline', 'middle')
+    .attr('x', bounds.x + bounds.width + gap)
+    .attr('y', bounds.y + bounds.height / 2)
+    .text('×');
+  const symbolBounds = symbol.node()!.getBBox();
+  const extraWidth = symbolBounds.x + symbolBounds.width - (bounds.x + bounds.width) + gap;
+  const shift = anchor === 'end' ? -extraWidth : anchor === 'middle' ? -extraWidth / 2 : 0;
+  el.attr('x', x + shift);
+  el.selectAll('tspan').attr('x', x + shift);
+  symbol.attr('x', bounds.x + bounds.width + gap + shift);
+  return labelGroup;
 };
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
