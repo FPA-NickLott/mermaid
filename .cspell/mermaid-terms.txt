@@ -46,6 +46,7 @@ sentencepiece
 siebling
 statediagram
 Structurizr
+subcause
 substate
 treeview
 unfixable
@@ -54,5 +55,6 @@ Viewbox
 viewports
 visio
 vitepress
+workplans
 xlink
 xychart

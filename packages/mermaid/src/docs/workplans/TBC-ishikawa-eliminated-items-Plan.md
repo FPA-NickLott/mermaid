@@ -65,7 +65,7 @@
   - Done when: focused browser assertions and Ishikawa fixture regressions pass for spec AC 1–9;
     inspect new snapshots and ensure ordinary fixtures have no unexplained visual changes.
 
-- [ ] Task 3: Document and release-note the authoring extension.
+- [x] Task 3: Document and release-note the authoring extension.
   - Touchpoints: `packages/mermaid/src/docs/syntax/ishikawa.md`, a feature changeset in
     `.changeset/`, and generated documentation produced by the existing docs tooling.
   - Describe recognition boundaries, the chosen symbol, root eligibility, no inherited status,
